@@ -4,12 +4,13 @@
 #include "helpers.h"
 #define DIM 2000
 #include <jpeglib.h>
+#include <time.h>
 
 int julia(int x, int y) {
 	const double scale = 1.5;
 	double jx = scale * (DIM / 2 - x)/(DIM/2);
 	double jy = scale * (DIM / 2 - y)/(DIM/2);
-	double complex c = -0.8 + 0.156 * I;
+	double complex c = -0.4 + 0.6 * I;
 	double complex a = jx + jy * I;
 	int i = 0;
 	for (i = 0; i < 200; i++) {
@@ -27,17 +28,21 @@ int main(void) {
 	int quality = 75;
 	char *scr=(char*)malloc(width * height * 3);
 	time_start();
-	FILE* outfile = fopen("out_cpu.jpg", "wb");
+	char *default_name = "out_cpu.jpg";
+	char buf[80];
+	snprintf(buf, 80, "%s%d", default_name, (int)time(NULL));
+	FILE* outfile = fopen(buf, "wb");
 	int i = 0;
 	int j = 0;
 	for (i = 0 ; i < width; i++)
 		for (j = 0; j < height; j++) {
 			char *p = scr + j * width * 3 + i * 3;
-			*p = julia(i, j) * 255;
+			int result = julia(i, j);
+			*p = result * 255;
 			p++;
-			*p = 0;
+			*p = 0;//result % 255;
 			p++;
-			*p = 0;
+			*p = 0;//result % 255;
 		}
 	printf("It takes %ld for calculation on cpu\n", time_stop());
 	/* Compress to JPEG */
